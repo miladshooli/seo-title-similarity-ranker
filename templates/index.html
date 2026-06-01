@@ -149,9 +149,19 @@
           <div class="hint" id="jina-hint">برای محاسبه امتیاز لازم است. در مرورگر شما ذخیره می‌شود.</div>
         </div>
         <div class="field">
-          <label for="searchapi"><span class="material-symbols-rounded">travel_explore</span> کلید SearchAPI</label>
-          <input type="password" id="searchapi" placeholder="روی سرور تنظیم شده — معمولاً نیازی نیست" />
-          <div class="hint" id="sa-hint"></div>
+          <label for="provider"><span class="material-symbols-rounded">travel_explore</span> سرویس استخراج عنوان</label>
+          <select id="provider">
+            <option value="searchapi">SearchAPI.io</option>
+            <option value="serper">Serper.dev</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="searchapi"><span class="material-symbols-rounded">key</span> کلید <span id="provider-name">SearchAPI.io</span></label>
+          <div class="row-key">
+            <input type="password" id="searchapi" placeholder="کلید سرویس سرچ خود را وارد کنید" />
+            <button type="button" class="icon-btn" id="toggle-sa"><span class="material-symbols-rounded" id="eye-sa">visibility</span></button>
+          </div>
+          <div class="hint" id="sa-hint">برای دریافت عنوان‌های گوگل لازم است. در مرورگر شما (به‌تفکیک سرویس) ذخیره می‌شود.</div>
         </div>
         <div class="grid2">
           <div class="field">
@@ -194,12 +204,26 @@
   <script>
     const $ = (s) => document.querySelector(s);
     const SERVER_HAS_SEARCHAPI = {{ 'true' if has_searchapi else 'false' }};
+    const SERVER_HAS_SERPER = {{ 'true' if has_serper else 'false' }};
     const SERVER_HAS_JINA = {{ 'true' if has_jina else 'false' }};
+    const PROVIDER_LABEL = { searchapi: 'SearchAPI.io', serper: 'Serper.dev' };
+    const serverHasSearch = (p) => p === 'serper' ? SERVER_HAS_SERPER : SERVER_HAS_SEARCHAPI;
 
     const form = $('#form'), submitBtn = $('#submit');
     const alertBox = $('#alert'), alertMsg = $('#alert-msg');
     const jinaInput = $('#jina'), saInput = $('#searchapi');
+    const providerSel = $('#provider');
     const recalcNote = $('#recalc-note');
+
+    const storedKey = (p) => localStorage.getItem('key_' + p) || '';
+    function applyProvider(p, loadKey) {
+      $('#provider-name').textContent = PROVIDER_LABEL[p] || p;
+      saInput.placeholder = 'کلید ' + (PROVIDER_LABEL[p] || p) + ' خود را وارد کنید';
+      if (loadKey) saInput.value = storedKey(p);
+      $('#sa-hint').textContent = serverHasSearch(p)
+        ? 'روی سرور تنظیم شده — می‌توانید خالی بگذارید.'
+        : 'برای دریافت عنوان‌های گوگل لازم است. در مرورگر شما (به‌تفکیک سرویس) ذخیره می‌شود.';
+    }
 
     // state
     let keyword = '';
@@ -207,14 +231,27 @@
     const scores = {};              // id -> {score, rank}
     let uid = 0;
 
-    // restore
+    // restore (migrate legacy single SearchAPI key once)
+    if (!storedKey('searchapi') && localStorage.getItem('searchapi_key'))
+      localStorage.setItem('key_searchapi', localStorage.getItem('searchapi_key'));
+    const provider0 = localStorage.getItem('provider') || 'searchapi';
+    providerSel.value = provider0;
+    providerSel.dataset.cur = provider0;
     jinaInput.value = localStorage.getItem('jina_key') || '';
-    saInput.value = localStorage.getItem('searchapi_key') || '';
+    applyProvider(provider0, true);
     $('#keyword').value = localStorage.getItem('last_keyword') || '';
     $('#gl').value = localStorage.getItem('gl') || 'us';
     $('#hl').value = localStorage.getItem('hl') || 'en';
-    if (SERVER_HAS_SEARCHAPI) $('#sa-hint').textContent = 'روی سرور تنظیم شده — می‌توانید خالی بگذارید.';
     if (SERVER_HAS_JINA) $('#jina-hint').textContent = 'روی سرور تنظیم شده — می‌توانید خالی بگذارید.';
+
+    providerSel.addEventListener('change', () => {
+      const prev = providerSel.dataset.cur || 'searchapi';
+      localStorage.setItem('key_' + prev, saInput.value.trim());   // remember previous provider's key
+      const p = providerSel.value;
+      providerSel.dataset.cur = p;
+      localStorage.setItem('provider', p);
+      applyProvider(p, true);
+    });
 
     $('#settings-toggle').addEventListener('click', () => $('#settings').classList.toggle('open'));
     $('#toggle-jina').addEventListener('click', () => {
@@ -222,6 +259,16 @@
       jinaInput.type = pw ? 'text' : 'password';
       $('#eye-jina').textContent = pw ? 'visibility_off' : 'visibility';
     });
+    $('#toggle-sa').addEventListener('click', () => {
+      const pw = saInput.type === 'password';
+      saInput.type = pw ? 'text' : 'password';
+      $('#eye-sa').textContent = pw ? 'visibility_off' : 'visibility';
+    });
+
+    // Open settings automatically on first use when a required key is missing.
+    const needJina = !SERVER_HAS_JINA && !jinaInput.value;
+    const needSa = !serverHasSearch(providerSel.value) && !saInput.value;
+    if (needJina || needSa) $('#settings').classList.add('open');
 
     function showError(msg) { alertMsg.textContent = msg; alertBox.classList.add('show'); alertBox.scrollIntoView({behavior:'smooth', block:'center'}); }
     function clearError() { alertBox.classList.remove('show'); }
@@ -230,7 +277,7 @@
     function fmt(n) { return (n == null) ? '—' : n.toFixed(4); }
 
     function keys() {
-      return { jina: jinaInput.value.trim(), searchapi: saInput.value.trim() };
+      return { jina: jinaInput.value.trim(), search: saInput.value.trim(), provider: providerSel.value };
     }
 
     function renderResults() {
@@ -324,11 +371,12 @@
       const kw = $('#keyword').value.trim();
       if (!kw) return showError('کیورد را وارد کنید.');
       const k = keys();
-      if (!SERVER_HAS_SEARCHAPI && !k.searchapi) return showError('کلید SearchAPI لازم است (در تنظیمات).');
-      if (!SERVER_HAS_JINA && !k.jina) return showError('کلید Jina API لازم است (در تنظیمات).');
+      if (!serverHasSearch(k.provider) && !k.search) { $('#settings').classList.add('open'); return showError('کلید ' + (PROVIDER_LABEL[k.provider] || 'سرویس سرچ') + ' لازم است (در تنظیمات).'); }
+      if (!SERVER_HAS_JINA && !k.jina) { $('#settings').classList.add('open'); return showError('کلید Jina API لازم است (در تنظیمات).'); }
 
       localStorage.setItem('jina_key', k.jina);
-      localStorage.setItem('searchapi_key', k.searchapi);
+      localStorage.setItem('key_' + k.provider, k.search);
+      localStorage.setItem('provider', k.provider);
       localStorage.setItem('last_keyword', kw);
       localStorage.setItem('gl', $('#gl').value);
       localStorage.setItem('hl', $('#hl').value);
@@ -337,7 +385,7 @@
       try {
         const resp = await fetch('/api/search', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ keyword: kw, searchapi_key: k.searchapi, gl: $('#gl').value, hl: $('#hl').value }),
+          body: JSON.stringify({ keyword: kw, provider: k.provider, search_key: k.search, gl: $('#gl').value, hl: $('#hl').value }),
         });
         const data = await resp.json();
         if (!resp.ok) throw new Error(data.error || 'خطای ناشناخته');

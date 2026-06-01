@@ -5,9 +5,10 @@ After=network.target
 [Service]
 Type=simple
 WorkingDirectory=/opt/jina-ranker
-# Bake your SearchAPI key here so users don't have to enter it in the UI:
-Environment="SEARCHAPI_KEY=YOUR_SEARCHAPI_KEY_HERE"
-# Optional: bake a default Jina key too so the field can be left empty:
+# By default users enter all keys in the UI. Optionally bake server-side
+# defaults here (then those fields can be left empty in the UI):
+# Environment="SEARCHAPI_KEY=..."     # for the SearchAPI.io provider
+# Environment="SERPER_KEY=..."        # for the Serper.dev provider
 # Environment="JINA_API_KEY=jina_xxx"
 # 1 worker so the in-memory embedding cache (incremental re-scoring) stays consistent.
 ExecStart=/usr/bin/gunicorn --workers 1 --threads 8 --timeout 90 --bind 127.0.0.1:8000 app:app

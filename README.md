@@ -2,7 +2,8 @@
 
 A small web app for SEO research: give it a **keyword**, and it
 
-1. fetches the **first‑page Google results** for that keyword (via [SearchAPI](https://www.searchapi.io/)),
+1. fetches the **first‑page Google results** for that keyword via a selectable provider —
+   [SearchAPI.io](https://www.searchapi.io/) or [Serper.dev](https://serper.dev/),
 2. scores how **semantically similar** each result title is to your keyword (via [Jina embeddings](https://jina.ai/), model `jina-embeddings-v5-text-small`, cosine similarity),
 3. shows the ranked titles with a clean **Material‑Design**, RTL (Persian) UI.
 
@@ -22,26 +23,28 @@ title. The list re‑sorts by embedding score after each change.
 ## How it works
 
 ```
-keyword ──▶ /api/search ──▶ SearchAPI (Google)  ──▶ [ {title, business, domain, position} ... ]
-                                                          │
-            editable titles  ◀───────────────────────────┘
+keyword ──▶ /api/search ──▶ SearchAPI.io / Serper.dev  ──▶ [ {title, business, domain, position} ... ]
+                                                                │
+            editable titles  ◀───────────────────────────────────┘
                 │
                 ▼
         /api/rank ──▶ Jina embeddings (cached) ──▶ cosine(keyword, title) ──▶ sorted by score
 ```
 
-- **`/api/search`** (POST) — `{ "keyword": "...", "gl": "us", "hl": "en" }` → list of organic
-  results with `title`, `source` (business name), `domain`, `link`, `favicon`, `position`.
+- **`/api/search`** (POST) — `{ "keyword": "...", "provider": "searchapi"|"serper", "search_key": "...", "gl": "us", "hl": "en" }`
+  → list of organic results with `title`, `source` (business name), `domain`, `link`, `favicon`, `position`.
+  The provider is chosen in the UI; each provider's key is stored separately in the browser.
 - **`/api/rank`** (POST) — `{ "query": "...", "items": [{id,title}, ...] }` → each item scored;
   the response field `embedded` tells you how many texts actually hit Jina this call
   (`0` = fully served from cache). Run with **1 gunicorn worker** so the cache is shared.
 
 ## API keys
 
-- **SearchAPI key** — set server‑side via the `SEARCHAPI_KEY` env var (see the systemd unit),
-  or entered in the UI settings.
-- **Jina key** — entered by the user in the UI settings (stored in the browser), or baked in
-  server‑side via `JINA_API_KEY`.
+By default **all keys are entered in the UI** and stored in the browser (the search key is
+remembered per‑provider). Optionally, you can bake server‑side defaults via env vars:
+
+- **Search provider key** — `SEARCHAPI_KEY` (SearchAPI.io) or `SERPER_KEY` (Serper.dev).
+- **Jina key** — `JINA_API_KEY`.
 
 ## Run locally
 
