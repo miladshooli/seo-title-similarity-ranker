@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.log
+.env
+*.tar.gz
+.DS_Store
+# never commit secrets or server credentials
+*.key
+*identity*.json
+wgcf-*.toml
+*.exp

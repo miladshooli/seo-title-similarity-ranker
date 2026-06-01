@@ -1,0 +1,18 @@
+[Unit]
+Description=SEO Title Similarity Ranker (Flask + Gunicorn)
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/jina-ranker
+# Bake your SearchAPI key here so users don't have to enter it in the UI:
+Environment="SEARCHAPI_KEY=YOUR_SEARCHAPI_KEY_HERE"
+# Optional: bake a default Jina key too so the field can be left empty:
+# Environment="JINA_API_KEY=jina_xxx"
+# 1 worker so the in-memory embedding cache (incremental re-scoring) stays consistent.
+ExecStart=/usr/bin/gunicorn --workers 1 --threads 8 --timeout 90 --bind 127.0.0.1:8000 app:app
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
