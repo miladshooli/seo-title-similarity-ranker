@@ -122,7 +122,7 @@ html[data-theme="dark"] .title-edit.dirty { background: #2e2710; border-color: #
     footer code { font-family: ui-monospace, monospace; background: var(--md-surface-variant); padding: 1px 7px; border-radius: 6px; }
   </style>
 
-  <style id="serpiwi-unify">html:root{--md-primary:#16a34a;--md-primary-hover:#15803d;--md-primary-container:#dcfce7;--md-on-primary-container:#0a3d23}html[data-theme="dark"]{--md-primary:#34d399;--md-primary-hover:#6ee7b7;--md-on-primary:#06302b;--md-primary-container:#173f31;--md-on-primary-container:#d1fae5}.container{max-width:960px}input,select,textarea{border-radius:12px;padding:12px 14px;font-size:1rem;font-family:inherit}.field{margin-bottom:18px}.card{border-radius:16px}</style>
+  <style id="serpiwi-unify">html:root{--md-primary:#16a34a;--md-primary-hover:#15803d;--md-primary-container:#dcfce7;--md-on-primary-container:#0a3d23}html[data-theme="dark"]{--md-primary:#34d399;--md-primary-hover:#6ee7b7;--md-on-primary:#06302b;--md-primary-container:#173f31;--md-on-primary-container:#d1fae5}.container{max-width:960px}input,select,textarea{border-radius:12px;padding:12px 14px;font-size:1rem;font-family:inherit}.field{margin-bottom:18px}.card{border-radius:16px}body{padding-top:var(--sp-nav-h)!important}</style>
 </head>
 <body>
   <script src="/static/serpiwi-shell.js"></script>
@@ -318,7 +318,7 @@ html[data-theme="dark"] .title-edit.dirty { background: #2e2710; border-color: #
           ? `<span class="biz-domain">${it.link ? `<a href="${esc(it.link)}" target="_blank" rel="noopener">${esc(it.domain)}</a>` : esc(it.domain)}</span>`
           : '';
         const serp = (it.position != null)
-          ? `<span class="serp-pos" title="رتبهٔ این کسب‌وکار در نتایج گوگل"><span class="material-symbols-rounded">trending_up</span> رتبهٔ گوگل: <b>${esc(String(it.position))}</b></span>`
+          ? `<span class="serp-pos" title="رتبه این کسب‌وکار در نتایج گوگل"><span class="material-symbols-rounded">trending_up</span> رتبه گوگل: <b>${esc(String(it.position))}</b></span>`
           : '';
         const el = document.createElement('div');
         el.className = 'result-item' + topCls;
