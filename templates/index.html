@@ -6,7 +6,9 @@
   <title>امتیازدهی شباهت عنوان‌های گوگل</title>
   <script>(function(){try{var m=document.cookie.match(/serpiwi_theme=(\w+)/);var t=m?m[1]:(localStorage.getItem('serpiwi_theme')||'system');var d=t==='dark'||(t==='system'&&matchMedia('(prefers-color-scheme:dark)').matches);document.documentElement.dataset.theme=d?'dark':'light';}catch(e){}})();</script>
   <link rel="stylesheet" href="/static/serpiwi-ui.css"/>
-  <script src="/static/serpiwi-shell.js" defer></script>
+  <link rel="preconnect" href="https://title.serpiwi.com"/>
+  <link rel="preconnect" href="https://reranker.serpiwi.com"/>
+  <link rel="preconnect" href="https://kwr.serpiwi.com"/>
   <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png" />
   <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-16x16.png" />
   <link rel="apple-touch-icon" href="/static/favicon-180x180.png" />
@@ -119,8 +121,11 @@ html[data-theme="dark"] .title-edit.dirty { background: #2e2710; border-color: #
     footer { text-align: center; font-size: .76rem; color: var(--md-on-surface-variant); padding: 8px 0 30px; }
     footer code { font-family: ui-monospace, monospace; background: var(--md-surface-variant); padding: 1px 7px; border-radius: 6px; }
   </style>
+
+  <style id="serpiwi-unify">html:root{--md-primary:#16a34a;--md-primary-hover:#15803d;--md-primary-container:#dcfce7;--md-on-primary-container:#0a3d23}html[data-theme="dark"]{--md-primary:#34d399;--md-primary-hover:#6ee7b7;--md-on-primary:#06302b;--md-primary-container:#173f31;--md-on-primary-container:#d1fae5}.container{max-width:960px}input,select,textarea{border-radius:12px;padding:12px 14px;font-size:1rem;font-family:inherit}.field{margin-bottom:18px}.card{border-radius:16px}</style>
 </head>
 <body>
+  <script src="/static/serpiwi-shell.js"></script>
   <div class="topbar">
     <div class="topbar-inner">
       <div class="logo"><span class="material-symbols-rounded">travel_explore</span></div>
