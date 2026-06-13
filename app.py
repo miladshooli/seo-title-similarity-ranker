@@ -12,6 +12,8 @@ SERPER_URL = "https://google.serper.dev/search"
 MODEL = "jina-embeddings-v5-text-small"
 
 app = Flask(__name__)
+from serpiwi_auth import init_auth
+init_auth(app, "Serpiwi · امتیاز عنوان")
 
 # In-memory embedding cache: text -> embedding vector.
 # Lets us re-score after a single title edit without re-embedding every title.

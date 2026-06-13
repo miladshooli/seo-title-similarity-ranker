@@ -15,6 +15,8 @@ echo "==> Copying app to $APP_DIR"
 mkdir -p "$APP_DIR/templates"
 cp "$REPO_DIR/app.py" "$APP_DIR/app.py"
 cp "$REPO_DIR/templates/index.html" "$APP_DIR/templates/index.html"
+cp "$REPO_DIR/serpiwi_auth.py" "$APP_DIR/serpiwi_auth.py"
+mkdir -p "$APP_DIR/static" && cp "$REPO_DIR/static/"*.png "$APP_DIR/static/"
 
 echo "==> Installing systemd service"
 cp "$REPO_DIR/deploy/jina-ranker.service" /etc/systemd/system/jina-ranker.service
